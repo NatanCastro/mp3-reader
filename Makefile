@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -std=c2x -pedantic -ggdb -O3
-SRC=main.c
+SRC=main.c mp3_reader.c byte_manipulation.c 
 
 AUDIO_FILE=./assets/audio_sample.mp3
 ERROR_AUDIO_FILE=./assets/error.mp3

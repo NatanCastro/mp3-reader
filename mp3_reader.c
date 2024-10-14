@@ -1,7 +1,9 @@
 #include "./mp3_reader.h"
 #include "./byte_manipulation.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 int get_bit_rate(uint8_t bit_rate_index, mpeg_version version,
                  layer_description layer) {
@@ -131,4 +133,140 @@ MP3Header create_mp3_header(uint8_t header_data[4]) {
       emphasis,
   };
   return mp3header;
+}
+
+char *version_str(mpeg_version version) {
+  switch (version) {
+  case MPEG_1:
+    return "MPEG Version 1 (ISO/IEC 11172-3)";
+  case MPEG_2:
+    return "MPEG Version 2 (ISO/IEC 13818-3)";
+  case MPEG_2_5:
+    return "MPEG Version 2.5 (unofficial)";
+  case MPEG_RESERVED:
+    return "reserved";
+  }
+
+  return "invalid MPEG version ID";
+}
+
+char *layer_str(layer_description layer) {
+  switch (layer) {
+  case LAYER_1:
+    return "Layer I";
+  case LAYER_2:
+    return "Layer II";
+  case LAYER_3:
+    return "Layer III";
+  case LAYER_RESERVED:
+    return "reserved";
+  }
+
+  return "Invalid Layer ID";
+}
+
+char *padding_str(bool padding, layer_description layer) {
+  if (padding) {
+    switch (layer) {
+    case LAYER_RESERVED:
+      return "Not Known";
+    case LAYER_3:
+    case LAYER_2:
+      return "8 bits";
+    case LAYER_1:
+      return "32 bits";
+      break;
+    }
+  } else {
+    return "No Padding";
+  }
+
+  return "Not Known";
+}
+
+char *channel_mode_str(channel_mode channel_mode) {
+  switch (channel_mode) {
+  case STEREO:
+    return "Stereo";
+  case JOINT_STEREO:
+    return "Joint Stereo";
+  case DUAL_CHANNEL:
+    return "Dual Channel";
+  case SINGLE_CHANNEL:
+    return "Single Channel";
+  }
+
+  return "Invalid channel mode";
+}
+
+char *mode_extension_str(uint8_t mode_extension, channel_mode channel_mode,
+                         layer_description layer) {
+  if (channel_mode == JOINT_STEREO) {
+    switch (layer) {
+    case LAYER_RESERVED:
+      return "Not Known";
+    case LAYER_3:
+      switch (mode_extension) {
+      case 0:
+        return "Intensity stereo OFF, MS stereo OFF";
+      case 1:
+        return "Intensity stereo ON, MS stereo OFF";
+      case 2:
+        return "Intensity stereo OFF, MS stereo ON";
+      case 3:
+        return "Intensity stereo ON, MS stereo ON";
+      }
+    case LAYER_2:
+    case LAYER_1:
+      switch (mode_extension) {
+      case 0:
+        return "bands 4 to 31";
+      case 1:
+        return "bands 8 to 31";
+      case 2:
+        return "bands 12 to 31";
+      case 3:
+        return "bands 16 to 31";
+      }
+    }
+  } else {
+    return "Only Joint Stereo uses mode extension";
+  }
+
+  return "Invalid mode extension";
+}
+
+char *emphasis_str(emphasis emphasis) {
+  switch (emphasis) {
+  case EMPHASIS_NONE:
+    return "No Emphasis";
+  case MS_50_15:
+    return "50/15 ms";
+  case EMPHASIS_RESERVED:
+    return "reserved";
+  case CCIT_J17:
+    return "CCIT J.17";
+  }
+
+  return "Invalid emphasis ID";
+}
+
+char *bool_str(bool boolean) { return boolean ? "Yes" : "No"; }
+
+void print_header(MP3Header *header) {
+  printf("frame sync: %x\n", header->frame_sync);
+  printf("version: %s\n", version_str(header->version));
+  printf("layer: %s\n", layer_str(header->layer));
+  printf("is protected: %s\n", bool_str(header->is_protected));
+  printf("bit rate: %ukb/s\n", header->bit_rate);
+  printf("sampling frequency: %uHz\n", header->sampling_frequency);
+  printf("padding: %s\n", padding_str(header->padding, header->layer));
+  printf("is private: %s\n", bool_str(header->is_private));
+  printf("channel mode: %s\n", channel_mode_str(header->channel_mode));
+  char *mode_extension = mode_extension_str(
+      header->mode_extension, header->channel_mode, header->layer);
+  printf("mode extension: %s\n", mode_extension);
+  printf("is copyrighted: %s\n", bool_str(header->is_copyrighted));
+  printf("is original: %s\n", bool_str(header->is_original));
+  printf("emphasis: %s\n", emphasis_str(header->emphasis));
 }

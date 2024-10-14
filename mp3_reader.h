@@ -53,4 +53,12 @@ int get_sampling_frequency(uint8_t, mpeg_version);
 
 MP3Header create_mp3_header(uint8_t[4]);
 
+void print_header(MP3Header *);
+char *version_str(mpeg_version);
+char *layer_str(layer_description);
+char *padding_str(bool, layer_description);
+char *channel_mode_str(channel_mode);
+char *mode_extension_str(uint8_t, channel_mode, layer_description);
+char *emphasis_str(emphasis);
+char *bool_str(bool);
 #endif // !MP3_READER_H_

@@ -28,15 +28,8 @@ int main(int argc, char *argv[]) {
   }
 
   MP3Header header = create_mp3_header(header_buffer);
-  printf("%u\n", header.is_protected);
 
-  if (header.is_protected) {
-    uint8_t crc_buffer[2] = {0};
-    if (!fread(crc_buffer, 1, 2, file)) {
-    }
-    printf("%u\n", join_two_u8(&crc_buffer[0], &crc_buffer[1]));
-  }
-
+  print_header(&header);
   fclose(file);
   return EXIT_SUCCESS;
 }

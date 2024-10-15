@@ -106,7 +106,7 @@ int get_sampling_frequency(uint8_t sampling_freq_index, mpeg_version version) {
   return -1; // Invalid sampling frequency index
 }
 
-MP3FrameHeader create_mp3_frame_header(uint8_t header_data[4]) {
+mp3_frame_header create_mp3_frame_header(uint8_t header_data[4]) {
   uint16_t first_two_bytes = join_two_u8(&header_data[0], &header_data[1]);
   uint16_t frame_sync = bits_from_u16(first_two_bytes, 5, REST_OF_BITS);
   uint8_t version = bits_from_u16(first_two_bytes, 3, TWO_BITS);
@@ -125,7 +125,7 @@ MP3FrameHeader create_mp3_frame_header(uint8_t header_data[4]) {
   int bit_rate = get_frame_bit_rate(bit_rate_index, version, layer_description);
   int sampling_frequency = get_sampling_frequency(sample_rate_index, version);
 
-  MP3FrameHeader mp3header = {
+  mp3_frame_header mp3header = {
       frame_sync,     version,   layer_description,
       protected,      bit_rate,  sampling_frequency,
       padding,        private,   channel_mode,
@@ -253,20 +253,23 @@ char *emphasis_str(emphasis emphasis) {
 
 char *bool_str(bool boolean) { return boolean ? "Yes" : "No"; }
 
-void print_header(MP3FrameHeader *header) {
-  printf("frame sync: %x\n", header->frame_sync);
-  printf("version: %s\n", version_str(header->version));
-  printf("layer: %s\n", layer_str(header->layer));
-  printf("is protected: %s\n", bool_str(header->is_protected));
-  printf("bit rate: %ukb/s\n", header->bit_rate);
-  printf("sampling frequency: %uHz\n", header->sampling_frequency);
-  printf("padding: %s\n", padding_str(header->padding, header->layer));
-  printf("is private: %s\n", bool_str(header->is_private));
-  printf("channel mode: %s\n", channel_mode_str(header->channel_mode));
+void print_header(mp3_frame_header *header, FILE *output) {
+  if (output == NULL)
+    output = stdout;
+
+  fprintf(output, "frame sync: %x\n", header->frame_sync);
+  fprintf(output, "version: %s\n", version_str(header->version));
+  fprintf(output, "layer: %s\n", layer_str(header->layer));
+  fprintf(output, "is protected: %s\n", bool_str(header->is_protected));
+  fprintf(output, "bit rate: %ukb/s\n", header->bit_rate);
+  fprintf(output, "sampling frequency: %uHz\n", header->sampling_frequency);
+  fprintf(output, "padding: %s\n", padding_str(header->padding, header->layer));
+  fprintf(output, "is private: %s\n", bool_str(header->is_private));
+  fprintf(output, "channel mode: %s\n", channel_mode_str(header->channel_mode));
   char *mode_extension = mode_extension_str(
       header->mode_extension, header->channel_mode, header->layer);
-  printf("mode extension: %s\n", mode_extension);
-  printf("is copyrighted: %s\n", bool_str(header->is_copyrighted));
-  printf("is original: %s\n", bool_str(header->is_original));
-  printf("emphasis: %s\n", emphasis_str(header->emphasis));
+  fprintf(output, "mode extension: %s\n", mode_extension);
+  fprintf(output, "is copyrighted: %s\n", bool_str(header->is_copyrighted));
+  fprintf(output, "is original: %s\n", bool_str(header->is_original));
+  fprintf(output, "emphasis: %s\n", emphasis_str(header->emphasis));
 }

@@ -1,3 +1,4 @@
+#include "dlinked_list.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -47,35 +48,24 @@ typedef struct {
   bool is_copyrighted;
   bool is_original;
   emphasis emphasis;
-} MP3FrameHeader;
+} mp3_frame_header;
 
 typedef struct {
-  MP3FrameHeader header;
+  mp3_frame_header header;
   int data;
 } MP3Frame;
 
-typedef struct MP3FrameListNode {
-  MP3FrameListNode *prev;
-  MP3Frame *data;
-  MP3FrameListNode *next;
-} MP3FrameListNodeT;
-
 typedef struct {
-  MP3FrameListNodeT *head;
-  MP3FrameListNodeT *tail;
-} MP3FrameList;
-
-typedef struct {
-  int *frames;
-} MP3Data;
+  dll_t frames;
+} mp3_data;
 
 int get_bit_rate(uint8_t, mpeg_version, layer_description);
 int get_sampling_frequency(uint8_t, mpeg_version);
 
-MP3FrameHeader create_mp3_frame_header(uint8_t[4]);
-MP3Data read_mp3_file(FILE *);
+mp3_frame_header create_mp3_frame_header(uint8_t[4]);
+mp3_data read_mp3_file(FILE *);
 
-void print_header(MP3FrameHeader *);
+void print_header(mp3_frame_header *, FILE *);
 char *version_str(mpeg_version);
 char *layer_str(layer_description);
 char *padding_str(bool, layer_description);

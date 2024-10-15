@@ -1,15 +1,18 @@
 CC=gcc
 CFLAGS=-Wall -Wextra -std=c2x -pedantic -ggdb -O3
-SRC=main.c mp3_reader.c byte_manipulation.c 
+SRC=src/*.c
+OUT_DIR=./bin
+OUT=$(OUT_DIR)/main
 
 AUDIO_FILE=./assets/audio_sample.mp3
 ERROR_AUDIO_FILE=./assets/error.mp3
 
-build: main.c
-	$(CC) $(CFLAGS) -o main $(SRC)
+build:
+	[ -d $(OUT_DIR) ] || mkdir $(OUT_DIR)
+	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
 
 
-run: main.c
+run:
 	./main $(AUDIO_FILE)
 
 

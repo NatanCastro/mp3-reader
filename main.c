@@ -27,9 +27,8 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  MP3Header header = create_mp3_header(header_buffer);
+  MP3FrameHeader header = create_mp3_frame_header(header_buffer);
 
-  print_header(&header);
   fclose(file);
   return EXIT_SUCCESS;
 }

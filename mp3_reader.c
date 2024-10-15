@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
-int get_bit_rate(uint8_t bit_rate_index, mpeg_version version,
-                 layer_description layer) {
+int get_frame_bit_rate(uint8_t bit_rate_index, mpeg_version version,
+                       layer_description layer) {
 
   uint8_t version_layer = (version << 2) | layer;
 
@@ -106,7 +106,7 @@ int get_sampling_frequency(uint8_t sampling_freq_index, mpeg_version version) {
   return -1; // Invalid sampling frequency index
 }
 
-MP3Header create_mp3_header(uint8_t header_data[4]) {
+MP3FrameHeader create_mp3_frame_header(uint8_t header_data[4]) {
   uint16_t first_two_bytes = join_two_u8(&header_data[0], &header_data[1]);
   uint16_t frame_sync = bits_from_u16(first_two_bytes, 5, REST_OF_BITS);
   uint8_t version = bits_from_u16(first_two_bytes, 3, TWO_BITS);
@@ -122,10 +122,10 @@ MP3Header create_mp3_header(uint8_t header_data[4]) {
   uint8_t original = bits_from_u8(header_data[3], 2, ONE_BIT);
   uint8_t emphasis = bits_from_u8(header_data[3], 0, TWO_BITS);
 
-  int bit_rate = get_bit_rate(bit_rate_index, version, layer_description);
+  int bit_rate = get_frame_bit_rate(bit_rate_index, version, layer_description);
   int sampling_frequency = get_sampling_frequency(sample_rate_index, version);
 
-  MP3Header mp3header = {
+  MP3FrameHeader mp3header = {
       frame_sync,     version,   layer_description,
       protected,      bit_rate,  sampling_frequency,
       padding,        private,   channel_mode,
@@ -253,7 +253,7 @@ char *emphasis_str(emphasis emphasis) {
 
 char *bool_str(bool boolean) { return boolean ? "Yes" : "No"; }
 
-void print_header(MP3Header *header) {
+void print_header(MP3FrameHeader *header) {
   printf("frame sync: %x\n", header->frame_sync);
   printf("version: %s\n", version_str(header->version));
   printf("layer: %s\n", layer_str(header->layer));

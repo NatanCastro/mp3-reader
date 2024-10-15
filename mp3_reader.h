@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #ifndef MP3_READER_H_
 #define MP3_READER_H_
@@ -46,14 +47,35 @@ typedef struct {
   bool is_copyrighted;
   bool is_original;
   emphasis emphasis;
-} MP3Header;
+} MP3FrameHeader;
+
+typedef struct {
+  MP3FrameHeader header;
+  int data;
+} MP3Frame;
+
+typedef struct MP3FrameListNode {
+  MP3FrameListNode *prev;
+  MP3Frame *data;
+  MP3FrameListNode *next;
+} MP3FrameListNodeT;
+
+typedef struct {
+  MP3FrameListNodeT *head;
+  MP3FrameListNodeT *tail;
+} MP3FrameList;
+
+typedef struct {
+  int *frames;
+} MP3Data;
 
 int get_bit_rate(uint8_t, mpeg_version, layer_description);
 int get_sampling_frequency(uint8_t, mpeg_version);
 
-MP3Header create_mp3_header(uint8_t[4]);
+MP3FrameHeader create_mp3_frame_header(uint8_t[4]);
+MP3Data read_mp3_file(FILE *);
 
-void print_header(MP3Header *);
+void print_header(MP3FrameHeader *);
 char *version_str(mpeg_version);
 char *layer_str(layer_description);
 char *padding_str(bool, layer_description);
